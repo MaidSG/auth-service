@@ -1,6 +1,6 @@
 package io.github.maidsg.debug;
 
-import io.github.maidsg.OkxPublicWebSocketConnector;
+import io.github.maidsg.websocket.client.OkxPublicWebSocketConnector;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;

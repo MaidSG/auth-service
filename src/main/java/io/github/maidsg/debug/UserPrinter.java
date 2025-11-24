@@ -19,12 +19,12 @@ public class UserPrinter {
 
 
     void onStart(@Observes StartupEvent ev) {
-        Log.info("=== Panache Users 表内容 ===");
-
-        List<User> users = User.listAll();
-
-        for (User u : users) {
-            Log.infof("ID=%d, Name=%s, Email=%s", u.id, u.name, u.email);
-        }
+//        Log.info("=== Panache Users 表内容 ===");
+//
+//        List<User> users = User.listAll();
+//
+//        for (User u : users) {
+//            Log.infof("ID=%d, Name=%s, Email=%s", u.id, u.name, u.email);
+//        }
     }
 }

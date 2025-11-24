@@ -1,15 +1,18 @@
-package io.github.maidsg;
+package io.github.maidsg.websocket.client;
 
+import io.github.maidsg.model.entity.User;
 import io.quarkus.logging.Log;
-import io.quarkus.websockets.next.BasicWebSocketConnector;
+import io.quarkus.runtime.Startup;
+import io.quarkus.runtime.StartupEvent;
 import io.quarkus.websockets.next.WebSocketClientConnection;
 import io.quarkus.websockets.next.WebSocketConnector;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.net.URI;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Singleton
 public class OkxPublicWebSocketConnector {
@@ -17,12 +20,16 @@ public class OkxPublicWebSocketConnector {
     @Inject
     WebSocketConnector<OkxClientEndpoint> connector;
 
-    public void connect() {
-        URI uri = URI.create("wss://ws.okx.com:8443"); // 外部 ws 服务
 
-        WebSocketClientConnection conn = connector
-                .baseUri(uri)      // ws://localhost:9000
-                .connectAndAwait(); // 阻塞直到连接成功
+    public WebSocketClientConnection connect() {
+        // 以 OKX 公共 WS 为例
+        URI uri = URI.create("wss://ws.okx.com:8443");
+
+        var connection = connector
+                .baseUri(uri)
+                .connectAndAwait(); // 建立连接
+
+
 
         // ===== 连接成功后立即发送订阅请求 =====
 //        String subscribeJson = """
@@ -37,14 +44,12 @@ public class OkxPublicWebSocketConnector {
 //            }
 //            """;
 //
-//        conn.sendTextAndAwait(subscribeJson);
+//        connection.sendTextAndAwait(subscribeJson);
 
-        System.out.println("订阅消息已发送！");
-
+        return  connection;
 
 
     }
-
 
 
 }

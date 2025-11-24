@@ -1,4 +1,4 @@
-package io.github.maidsg.config.scheduler;
+package io.github.maidsg.websocket.scheduler;
 
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.ScheduledExecution;
@@ -12,9 +12,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @ApplicationScoped
 public class CounterBean {
-
-
-
 
 //    private AtomicInteger counter = new AtomicInteger();
 //
