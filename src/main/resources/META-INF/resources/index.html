@@ -201,7 +201,14 @@
       const statusText = document.getElementById('statusText');
       const appendToggle = document.getElementById('appendToggle');
 
-      const WS_URL = 'ws://localhost:8533/as-api/ws/events';
+      const defaultPort = '8533'; // 若使用不同端口，改为对应端口
+      const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+      // 如果前端由 nginx 反代到同一 host:port，可以直接省略端口：const host = location.host;
+      const host = location.hostname + (location.port ? `:${location.port}` : `:${defaultPort}`);
+      const WS_URL = `${proto}://${host}/as-api/ws/events`;
+      // 使用 WS_URL 创建 socket
+      // socket = new WebSocket(WS_URL);
+      console.log('Using WS URL:', WS_URL);
       let socket = null;
       let connected = false;
 
