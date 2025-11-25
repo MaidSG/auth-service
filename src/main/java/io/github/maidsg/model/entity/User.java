@@ -13,16 +13,16 @@ import jakarta.persistence.*;
 public class User extends PanacheEntityBase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // <- 使用 SQLite 自增
-    public Long id;
+    public Integer id;
 
     public String name;
     public String email;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

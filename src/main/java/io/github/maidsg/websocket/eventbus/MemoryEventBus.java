@@ -1,5 +1,6 @@
 package io.github.maidsg.websocket.eventbus;
 
+import io.quarkus.logging.Log;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -53,14 +54,16 @@ public class MemoryEventBus {
                         s.onEvent(event);
                     } catch (Throwable ex) {
                         // 忽略单个订阅者异常，必要时扩展 DLQ / 日志
-                        ex.printStackTrace();
+                        Log.errorf(ex, "EventBus subscriber %s failed to handle event %s", s.getClass().getName(), event.getClass().getName());
                     }
                 });
             } catch (RejectedExecutionException ex) {
                 // 队列已满，采用简单降级：直接在当前线程调用（已经由 CallerRunsPolicy 避免）
                 try {
                     s.onEvent(event);
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    Log.errorf(ignored, "EventBus subscriber %s failed to handle event %s in fallback", s.getClass().getName(), event.getClass().getName());
+                }
             }
         }
     }

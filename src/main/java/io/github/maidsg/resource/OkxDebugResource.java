@@ -21,7 +21,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
  * OKX 调试接口
  * @author wy
  */
-@Path("/debug/okx")
+@Path("/okx/debug")
 @Tag(name = "OKX 调试接口", description = "OKX 调试接口")
 public class OkxDebugResource {
 

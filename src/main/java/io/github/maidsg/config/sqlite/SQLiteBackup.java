@@ -10,6 +10,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
@@ -28,7 +29,7 @@ public class SQLiteBackup {
     @Inject
     AgroalDataSource dataSource;
 
-    // Execute a backup every 10 seconds
+    // Execute a backup every 600 seconds
     @Scheduled(delay=10, delayUnit= TimeUnit.SECONDS, every="5s")
     void scheduled() { backup(); }
 
@@ -38,21 +39,22 @@ public class SQLiteBackup {
     void backup() {
         String dbFile = jdbcUrl.substring("jdbc:sqlite:".length());
 
-        var originalDbFilePath = Paths.get(dbFile);
-        var backupDbFilePath = originalDbFilePath
-                .toAbsolutePath()
+        Path originalDbFilePath = Paths.get(dbFile).toAbsolutePath();
+        Path backupDbFilePath = originalDbFilePath
                 .getParent()
-                .resolve(originalDbFilePath.getFileName() + "_backup");
+                .resolve(originalDbFilePath.getFileName() + ".bak");
+
+        try {
+            Files.deleteIfExists(backupDbFilePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to prepare backup destination", e);
+        }
 
         try (var conn = dataSource.getConnection();
              var stmt = conn.createStatement()) {
-            // Execute the backup
-            stmt.executeUpdate("backup to " + backupDbFilePath);
-            // Atomically replace the DB file with its backup
-            Files.move(backupDbFilePath, originalDbFilePath,
-                    StandardCopyOption.ATOMIC_MOVE,
-                    StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException | SQLException e) {
+            String target = backupDbFilePath.toString().replace("'", "''");
+            stmt.executeUpdate("VACUUM INTO '" + target + "'");
+        } catch (SQLException e) {
             throw new RuntimeException("Failed to back up the database", e);
         }
     }

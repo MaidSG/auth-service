@@ -1,9 +1,9 @@
 package io.github.maidsg.websocket.client;
 
+import io.github.maidsg.service.business.OkxMessageDispatcher;
 import io.github.maidsg.websocket.eventbus.ControlEvent;
 import io.github.maidsg.websocket.eventbus.MemoryEventBus;
 import io.github.maidsg.websocket.eventbus.ServerEvent;
-import io.github.maidsg.websocket.heartbeat.OkxHeartbeatManager;
 import io.github.maidsg.websocket.manager.OkxConnectionManager;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
@@ -11,7 +11,6 @@ import io.quarkus.websockets.next.*;
 import io.vertx.core.buffer.Buffer;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import org.quartz.SchedulerException;
 
 /**
  * OKX 公共 WebSocket 客户端端点
@@ -19,13 +18,18 @@ import org.quartz.SchedulerException;
  * 所以WebSocketClientConnection对象
  * 只适用于被 @OnOpen 、 @OnTextMessage 、 @OnBinaryMessage
  * 和 @OnClose 注解的方法
+ *
+ * WS / 行情频道
+ * 获取产品的最新成交价、买一价、卖一价和24小时交易量等信息。在提前挂单阶段，best ask的价格有机会低于best bid。
+ * 最快100ms推送一次，没有触发事件时不推送，触发推送的事件有：成交、买一卖一发生变动。
+ *
+ * WS / 交易频道
+ * 获取最近的成交数据，有成交数据就推送，每次推送可能聚合多条成交数据。
+ * 根据每个taker订单的不同成交价格推送消息，并使用count字段表示聚合的订单匹配数量。
+ *
  */
 @WebSocketClient(path = "/ws/v5/public")
-public class OkxClientEndpoint {
-
-    void onStart(@Observes StartupEvent ev) {
-        bus.register(this::onEvent);
-    }
+public class OkxPublicClientEndpoint {
 
     @Inject
     MemoryEventBus bus;
@@ -33,10 +37,12 @@ public class OkxClientEndpoint {
     @Inject
     OkxConnectionManager manager;
 
-//    @Inject
-//    OkxHeartbeatManager heartbeatManager;
+    @Inject
+    OkxMessageDispatcher dispatcher;
 
-
+    void onStart(@Observes StartupEvent ev) {
+        bus.register(this::onEvent);
+    }
 
 
     void onEvent(ServerEvent event) {
@@ -61,6 +67,19 @@ public class OkxClientEndpoint {
                 break;
             case "unsubscribe":
                 // 取消订阅
+                String unsubscribeJson = """
+                        {
+                            "op":"unsubscribe",
+                            "args":[
+                                {
+                                    "channel":"tickers",
+                                    "instId":"BTC-USDT"
+                                }
+                            ]
+                        }
+                        """;
+                manager.send(unsubscribeJson);
+
                 break;
             case "ping":
                 // 示例：响应心跳或记录
@@ -74,11 +93,14 @@ public class OkxClientEndpoint {
     @OnTextMessage
     void onMessage(String msg, WebSocketClientConnection conn) {
 
-        Log.debug(">>> 收到 OKX 公共 WebSocket 消息: " + msg);
-        System.out.println(msg);
-
+//        Log.debug(">>> 收到 OKX 公共 WebSocket 消息: " + msg);
+//        System.out.println(msg);
         // 区分消息,分发给不同的工厂处理
 
+        // 行情频道 成功订阅响应 失败响应 行情数据推送
+        dispatcher.dispatchRaw(msg);
+
+        // 交易频道数据
 
 
 
@@ -88,6 +110,20 @@ public class OkxClientEndpoint {
     void onOpen(WebSocketClientConnection conn) {
         Log.info(">>> 已连接到 OKX 公共 WebSocket 服务");
         manager.setConnection(conn);
+
+        // 订阅交易频道数据
+        String subscribeJson = """
+                        {
+                            "op":"subscribe",
+                            "args":[
+                                {
+                                    "channel":"trades",
+                                    "instId":"BTC-USDT-SWAP"
+                                }
+                            ]
+                        }
+                        """;
+        manager.send(subscribeJson);
 
     }
 

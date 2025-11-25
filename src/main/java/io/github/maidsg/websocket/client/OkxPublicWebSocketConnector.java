@@ -1,24 +1,17 @@
 package io.github.maidsg.websocket.client;
 
-import io.github.maidsg.model.entity.User;
-import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
-import io.quarkus.runtime.StartupEvent;
 import io.quarkus.websockets.next.WebSocketClientConnection;
 import io.quarkus.websockets.next.WebSocketConnector;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.net.URI;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Singleton
 public class OkxPublicWebSocketConnector {
 
     @Inject
-    WebSocketConnector<OkxClientEndpoint> connector;
+    WebSocketConnector<OkxPublicClientEndpoint> connector;
 
 
     public WebSocketClientConnection connect() {
