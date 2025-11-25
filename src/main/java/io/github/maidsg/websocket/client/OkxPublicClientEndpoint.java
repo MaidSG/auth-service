@@ -38,7 +38,12 @@ public class OkxPublicClientEndpoint {
     OkxConnectionManager manager;
 
     @Inject
+    OkxPublicWebSocketConnector connector;
+
+    @Inject
     OkxMessageDispatcher dispatcher;
+
+    private static  String CLIENT_ID = "";
 
     void onStart(@Observes StartupEvent ev) {
         bus.register(this::onEvent);
@@ -63,7 +68,7 @@ public class OkxPublicClientEndpoint {
                             ]
                         }
                         """;
-                manager.send(subscribeJson);
+                manager.send(CLIENT_ID,subscribeJson);
                 break;
             case "unsubscribe":
                 // 取消订阅
@@ -78,7 +83,7 @@ public class OkxPublicClientEndpoint {
                             ]
                         }
                         """;
-                manager.send(unsubscribeJson);
+                manager.send(CLIENT_ID,unsubscribeJson);
 
                 break;
             case "ping":
@@ -108,8 +113,9 @@ public class OkxPublicClientEndpoint {
 
     @OnOpen
     void onOpen(WebSocketClientConnection conn) {
-        Log.info(">>> 已连接到 OKX 公共 WebSocket 服务");
-        manager.setConnection(conn);
+        Log.info(">>> 已连接到 OKX 公共 WebSocket 行情频道");
+        CLIENT_ID = conn.clientId();
+        manager.setConnection(CLIENT_ID, conn);
 
         // 订阅交易频道数据
         String subscribeJson = """
@@ -123,7 +129,21 @@ public class OkxPublicClientEndpoint {
                             ]
                         }
                         """;
-        manager.send(subscribeJson);
+        manager.send(CLIENT_ID,subscribeJson);
+
+        // 订阅行情频道数据
+        subscribeJson = """
+                        {
+                            "op":"subscribe",
+                            "args":[
+                                {
+                                    "channel":"tickers",
+                                    "instId":"BTC-USDT"
+                                }
+                            ]
+                        }
+                        """;
+        manager.send(CLIENT_ID,subscribeJson);
 
     }
 
@@ -143,7 +163,9 @@ public class OkxPublicClientEndpoint {
 
     @OnClose
     void onClose() {
-        manager.reconnect();
+        connector.connectPC();
+        Log.warn(">>> OKX 公共 WebSocket 连接已关闭");
+
     }
 
 

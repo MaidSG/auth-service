@@ -11,37 +11,32 @@ import java.net.URI;
 public class OkxPublicWebSocketConnector {
 
     @Inject
-    WebSocketConnector<OkxPublicClientEndpoint> connector;
+    WebSocketConnector<OkxPublicClientEndpoint> publicConnector;
+
+    @Inject
+    WebSocketConnector<OkxBusinessClientEndpoint> businessConnector;
 
 
-    public WebSocketClientConnection connect() {
+    public WebSocketClientConnection connectPC() {
         // 以 OKX 公共 WS 为例
         URI uri = URI.create("wss://ws.okx.com:8443");
 
-        var connection = connector
+        var connection = publicConnector
                 .baseUri(uri)
                 .connectAndAwait(); // 建立连接
 
+        return  connection;
+    }
 
+    public WebSocketClientConnection connectBusiness() {
+        // 以 OKX 公共 WS 为例
+        URI uri = URI.create("wss://ws.okx.com:8443");
 
-        // ===== 连接成功后立即发送订阅请求 =====
-//        String subscribeJson = """
-//            {
-//                "op":"subscribe",
-//                "args":[
-//                    {
-//                        "channel":"tickers",
-//                        "instId":"BTC-USDT"
-//                    }
-//                ]
-//            }
-//            """;
-//
-//        connection.sendTextAndAwait(subscribeJson);
+        var connection = businessConnector
+                .baseUri(uri)
+                .connectAndAwait(); // 建立连接
 
         return  connection;
-
-
     }
 
 

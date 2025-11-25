@@ -101,6 +101,7 @@ public class OkxMessageDispatcher {
             case "tickers" -> OkxMessageTypeEnum.TICKER_DATA;
             case "books" -> OkxMessageTypeEnum.ORDER_BOOK_DATA;
             case "trades" -> OkxMessageTypeEnum.TRADE_DATA;
+            case "candle3m" -> OkxMessageTypeEnum.CANDLE_DATA;
             default -> null;
         };
     }

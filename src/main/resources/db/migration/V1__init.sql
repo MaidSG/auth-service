@@ -29,11 +29,54 @@ CREATE TABLE IF NOT EXISTS okx_raw_trades (
                                               source        TEXT,
                                               seq_id        INTEGER,
                                               raw_payload   TEXT,
-                                              created_at    INTEGER    NOT NULL
+                                              created_at    TEXT    NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_okx_raw_trades_inst_id
     ON okx_raw_trades (inst_id);
+
+
+DROP TABLE  IF EXISTS okx_kline_data_3m;
+
+CREATE TABLE okx_kline_data_3m (
+                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                   channel VARCHAR(32) NOT NULL,
+                                   inst_id VARCHAR(64) NOT NULL,
+                                   inst_type VARCHAR(32),
+                                   ts TIMESTAMP NOT NULL,
+                                   open_price DECIMAL(38, 18) NOT NULL,
+                                   high_price DECIMAL(38, 18) NOT NULL,
+                                   low_price DECIMAL(38, 18) NOT NULL,
+                                   close_price DECIMAL(38, 18) NOT NULL,
+                                   vol_contracts DECIMAL(38, 18) NOT NULL,
+                                   vol_ccy DECIMAL(38, 18),
+                                   vol_ccy_quote DECIMAL(38, 18),
+                                   confirm_status CHAR(1) NOT NULL
+);
+
+DrOP TABLE  IF EXISTS okx_ticker_data;
+
+CREATE TABLE okx_ticker_data (
+                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 channel VARCHAR(32) NOT NULL,
+                                 inst_id VARCHAR(64) NOT NULL,
+                                 inst_type VARCHAR(32) NOT NULL,
+                                 last_price DECIMAL(38, 18) NOT NULL,
+                                 last_size DECIMAL(38, 18) NOT NULL,
+                                 ask_price DECIMAL(38, 18) NOT NULL,
+                                 ask_size DECIMAL(38, 18) NOT NULL,
+                                 bid_price DECIMAL(38, 18) NOT NULL,
+                                 bid_size DECIMAL(38, 18) NOT NULL,
+                                 open_24h DECIMAL(38, 18) NOT NULL,
+                                 high_24h DECIMAL(38, 18) NOT NULL,
+                                 low_24h DECIMAL(38, 18) NOT NULL,
+                                 vol_ccy_24h DECIMAL(38, 18) NOT NULL,
+                                 vol_24h DECIMAL(38, 18) NOT NULL,
+                                 sod_utc0 DECIMAL(38, 18) NOT NULL,
+                                 sod_utc8 DECIMAL(38, 18) NOT NULL,
+                                 ts TIMESTAMP NOT NULL
+);
+
 
 
 

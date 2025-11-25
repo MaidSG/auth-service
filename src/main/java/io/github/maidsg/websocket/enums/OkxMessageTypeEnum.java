@@ -16,14 +16,17 @@ public enum OkxMessageTypeEnum {
     TICKER_DATA,
 
     TRADE,
-    TRADE_DATA;
+    TRADE_DATA,
+
+    CANDLE,
+    CANDLE_DATA;
 
     public boolean isSubscriptionAck() {
-        return this == ORDER_BOOK || this == TICKER || this == TRADE;
+        return this == ORDER_BOOK || this == TICKER || this == TRADE || this == CANDLE;
     }
 
     public boolean isDataPush() {
-        return this == ORDER_BOOK_DATA || this == TICKER_DATA || this == TRADE_DATA;
+        return this == ORDER_BOOK_DATA || this == TICKER_DATA || this == TRADE_DATA || this == CANDLE_DATA;
     }
 
     public String channelKey() {
@@ -31,6 +34,7 @@ public enum OkxMessageTypeEnum {
             case ORDER_BOOK, ORDER_BOOK_DATA -> "books";
             case TICKER, TICKER_DATA -> "tickers";
             case TRADE, TRADE_DATA -> "trades";
+            case CANDLE, CANDLE_DATA -> "candle";
         };
     }
 

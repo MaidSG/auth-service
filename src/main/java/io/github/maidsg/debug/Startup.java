@@ -14,12 +14,13 @@ import jakarta.inject.Singleton;
 public class Startup {
 
     @Inject
-    OkxPublicWebSocketConnector runner;
+    OkxPublicWebSocketConnector connector;
     @Inject
     UserPrinter printer;
 
     void onStart(@Observes StartupEvent ev) {
-        runner.connect();
+        connector.connectPC();
+        connector.connectBusiness();
     }
 
 }

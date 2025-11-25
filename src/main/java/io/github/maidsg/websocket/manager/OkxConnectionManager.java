@@ -5,6 +5,9 @@ import io.quarkus.websockets.next.WebSocketClientConnection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /*******************************************************************
  *
  * @author wy
@@ -12,33 +15,30 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class OkxConnectionManager {
 
-    @Inject
-    OkxPublicWebSocketConnector connector;
 
-    private volatile WebSocketClientConnection connection;
+    private final ConcurrentMap<String, WebSocketClientConnection> connections = new ConcurrentHashMap<>();
 
-    public synchronized WebSocketClientConnection getConnection() {
-        return connection;
+
+    public synchronized WebSocketClientConnection getConnection(String clientId) {
+        return connections.get(clientId);
     }
 
-    public synchronized void setConnection(WebSocketClientConnection conn) {
-        this.connection = conn;
+    public synchronized void setConnection(String clientId,WebSocketClientConnection conn) {
+        connections.put(clientId, conn);
     }
 
-    /** 仅用于重连，不用于业务发送 */
-    public synchronized WebSocketClientConnection reconnect() {
-        connection = connector.connect();
-        return connection;
-    }
 
-    public boolean isConnected() {
+
+    public boolean isConnected(String clientId) {
+        WebSocketClientConnection connection = connections.get(clientId);
         return connection != null && connection.isOpen();
     }
 
-    public void send(String message) {
-        if (!isConnected()) {
+    public void send(String clientId, String message) {
+        if (!isConnected(clientId)) {
             throw new IllegalStateException("WebSocket 未连接，无法发送消息");
         }
+        WebSocketClientConnection connection = connections.get(clientId);
         connection.sendTextAndAwait(message);
     }
 
