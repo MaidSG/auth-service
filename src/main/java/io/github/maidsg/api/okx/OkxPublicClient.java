@@ -6,6 +6,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+import java.util.List;
+
 /*******************************************************************
  * okx 公共 REST API 客户端
  * @author wy
@@ -25,6 +27,14 @@ public interface OkxPublicClient {
     OkxPublicResp<Instrument> getInstruments(
             @QueryParam("instType") String instType
     );
+
+
+    /**
+     * 获取服务器时间
+     */
+    @GET
+    @Path("/api/v5/public/time")
+    OkxPublicResp<List<String>> getServerTime();
 
 
 

@@ -26,13 +26,13 @@ public class PerHeatStartUp {
 
     void onStart(@Observes StartupEvent ev) {
 
-        Log.info("===== 基础数据初始化开始 =====");
+        Log.info("===== 系统初始化开始 =====");
         // 调用接口更新交易所基础数据
 
         // okx 基础信息
 //        oIManger.doRefreshInstruments();
 
-
+        // 登录
 
 
 
