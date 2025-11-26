@@ -9,6 +9,9 @@ package io.github.maidsg.websocket.enums;
  */
 public enum OkxMessageTypeEnum {
 
+    LOGIN,
+    ERROR,
+
     ORDER_BOOK,
     ORDER_BOOK_DATA,
 
@@ -21,6 +24,7 @@ public enum OkxMessageTypeEnum {
     CANDLE,
     CANDLE_DATA;
 
+
     public boolean isSubscriptionAck() {
         return this == ORDER_BOOK || this == TICKER || this == TRADE || this == CANDLE;
     }
@@ -31,6 +35,8 @@ public enum OkxMessageTypeEnum {
 
     public String channelKey() {
         return switch (this) {
+            case  LOGIN -> "login";
+            case ERROR -> "error";
             case ORDER_BOOK, ORDER_BOOK_DATA -> "books";
             case TICKER, TICKER_DATA -> "tickers";
             case TRADE, TRADE_DATA -> "trades";

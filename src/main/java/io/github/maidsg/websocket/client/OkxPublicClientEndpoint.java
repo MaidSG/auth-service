@@ -1,6 +1,7 @@
 package io.github.maidsg.websocket.client;
 
 import io.github.maidsg.service.business.OkxMessageDispatcher;
+import io.github.maidsg.service.business.OkxSignatureService;
 import io.github.maidsg.websocket.eventbus.ControlEvent;
 import io.github.maidsg.websocket.eventbus.MemoryEventBus;
 import io.github.maidsg.websocket.eventbus.ServerEvent;
@@ -12,21 +13,22 @@ import io.vertx.core.buffer.Buffer;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 
+import java.util.Date;
+
 /**
  * OKX 公共 WebSocket 客户端端点
  * 接口@WebSocketClient 提供的都是@SessionScoped 实现
  * 所以WebSocketClientConnection对象
  * 只适用于被 @OnOpen 、 @OnTextMessage 、 @OnBinaryMessage
  * 和 @OnClose 注解的方法
- *
+ * <p>
  * WS / 行情频道
  * 获取产品的最新成交价、买一价、卖一价和24小时交易量等信息。在提前挂单阶段，best ask的价格有机会低于best bid。
  * 最快100ms推送一次，没有触发事件时不推送，触发推送的事件有：成交、买一卖一发生变动。
- *
+ * <p>
  * WS / 交易频道
  * 获取最近的成交数据，有成交数据就推送，每次推送可能聚合多条成交数据。
  * 根据每个taker订单的不同成交价格推送消息，并使用count字段表示聚合的订单匹配数量。
- *
  */
 @WebSocketClient(path = "/ws/v5/public")
 public class OkxPublicClientEndpoint {
@@ -43,7 +45,11 @@ public class OkxPublicClientEndpoint {
     @Inject
     OkxMessageDispatcher dispatcher;
 
-    private static  String CLIENT_ID = "";
+    @Inject
+    OkxSignatureService signatureService;
+
+    private static String CLIENT_ID = "";
+
 
     void onStart(@Observes StartupEvent ev) {
         bus.register(this::onEvent);
@@ -68,7 +74,7 @@ public class OkxPublicClientEndpoint {
                             ]
                         }
                         """;
-                manager.send(CLIENT_ID,subscribeJson);
+                manager.send(CLIENT_ID, subscribeJson);
                 break;
             case "unsubscribe":
                 // 取消订阅
@@ -83,7 +89,7 @@ public class OkxPublicClientEndpoint {
                             ]
                         }
                         """;
-                manager.send(CLIENT_ID,unsubscribeJson);
+                manager.send(CLIENT_ID, unsubscribeJson);
 
                 break;
             case "ping":
@@ -108,7 +114,6 @@ public class OkxPublicClientEndpoint {
         // 交易频道数据
 
 
-
     }
 
     @OnOpen
@@ -119,31 +124,57 @@ public class OkxPublicClientEndpoint {
 
         // 订阅交易频道数据
         String subscribeJson = """
+                {
+                    "op":"subscribe",
+                    "args":[
                         {
-                            "op":"subscribe",
-                            "args":[
-                                {
-                                    "channel":"trades",
-                                    "instId":"BTC-USDT-SWAP"
-                                }
-                            ]
+                            "channel":"trades",
+                            "instId":"BTC-USDT-SWAP"
                         }
-                        """;
-        manager.send(CLIENT_ID,subscribeJson);
+                    ]
+                }
+                """;
+        manager.send(CLIENT_ID, subscribeJson);
 
         // 订阅行情频道数据
         subscribeJson = """
+                {
+                    "op":"subscribe",
+                    "args":[
                         {
-                            "op":"subscribe",
-                            "args":[
-                                {
-                                    "channel":"tickers",
-                                    "instId":"BTC-USDT"
-                                }
-                            ]
+                            "channel":"tickers",
+                            "instId":"BTC-USDT"
                         }
-                        """;
-        manager.send(CLIENT_ID,subscribeJson);
+                    ]
+                }
+                """;
+        manager.send(CLIENT_ID, subscribeJson);
+
+
+        // 订阅深度频道数据
+        // 登录
+        Long timestamp = System.currentTimeMillis() / 1000;
+
+        String loginJson = """
+                {
+                    "op":"login",
+                    "args":[
+                        {
+                            "apiKey":"%s",
+                            "passphrase":"%s",
+                            "timestamp":"%s",
+                            "sign":"%s"
+                        }
+                    ]
+                }
+                """.formatted(
+                signatureService.getApiKey(),
+                signatureService.getPassphrase(),
+                timestamp.toString(),
+                signatureService.buildWebSocketSig(timestamp.toString(), signatureService.getApiSecret())
+        );
+        manager.send(CLIENT_ID, loginJson);
+
 
     }
 

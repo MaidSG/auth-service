@@ -2,6 +2,7 @@ package io.github.maidsg.api.okx;
 
 import io.github.maidsg.api.okx.model.client.OkxPublicResp;
 import io.github.maidsg.api.okx.model.dto.common.Instrument;
+import io.github.maidsg.api.okx.model.dto.common.OkxServerTime;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
@@ -34,7 +35,7 @@ public interface OkxPublicClient {
      */
     @GET
     @Path("/api/v5/public/time")
-    OkxPublicResp<List<String>> getServerTime();
+    OkxPublicResp<OkxServerTime> getServerTime();
 
 
 

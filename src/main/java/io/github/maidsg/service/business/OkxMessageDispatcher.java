@@ -73,6 +73,17 @@ public class OkxMessageDispatcher {
             Log.debugf("Unable to resolve message type from payload: %s", payload);
             return;
         }
+
+        if (type == OkxMessageTypeEnum.LOGIN) {
+            Log.infof("====== Received LOGIN message: %s", payload);
+            return;
+        }
+
+        if (type == OkxMessageTypeEnum.ERROR) {
+            Log.errorf("====== Received ERROR message: %s", payload);
+            return;
+        }
+
         dispatch(type, rootFields, payload);
     }
 
@@ -88,20 +99,24 @@ public class OkxMessageDispatcher {
     private OkxMessageTypeEnum resolveMessageType(RootFields rootFields) {
         String event = rootFields.getEvent();
         String channel = rootFields.getChannel();
+        String type = "";
 
         if ("subscribe".equalsIgnoreCase(event) || "error".equalsIgnoreCase(event)) {
             return resolveSubscriptionType(channel);
         }
 
-        if (channel == null) {
+        if (channel == null && event == null) {
             return null;
         }
 
-        return switch (channel.toLowerCase()) {
+        type = channel == null ? event.toLowerCase() : channel.toLowerCase();
+
+        return switch (type) {
             case "tickers" -> OkxMessageTypeEnum.TICKER_DATA;
             case "books" -> OkxMessageTypeEnum.ORDER_BOOK_DATA;
             case "trades" -> OkxMessageTypeEnum.TRADE_DATA;
             case "candle3m" -> OkxMessageTypeEnum.CANDLE_DATA;
+            case "login" -> OkxMessageTypeEnum.LOGIN;
             default -> null;
         };
     }
@@ -114,6 +129,7 @@ public class OkxMessageDispatcher {
             case "tickers" -> OkxMessageTypeEnum.TICKER;
             case "books" -> OkxMessageTypeEnum.ORDER_BOOK;
             case "trades" -> OkxMessageTypeEnum.TRADE;
+            case "error" -> OkxMessageTypeEnum.ERROR;
             default -> null;
         };
     }

@@ -16,4 +16,15 @@ public class OkxPublicResp<T> {
     private String msg;
     private List<T> data;
 
+
+
+    public T getFirst() {
+        if (data != null && data.size() > 0) {
+            return data.get(0);
+        }
+        return null;
+    }
+
+
+
 }
