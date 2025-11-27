@@ -72,7 +72,7 @@ public class OkxCandleRoute implements MarketMessageHandler {
 
     private void handleCandleData(String payload) {
         persistTrades(payload);
-        MarketMessageBridge.dispatch(payload);
+//        MarketMessageBridge.dispatch(payload);
     }
 
 

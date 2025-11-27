@@ -15,6 +15,14 @@ public enum OkxMessageTypeEnum {
     ORDER_BOOK,
     ORDER_BOOK_DATA,
 
+    ORDER_BOOK_TBT,
+    ORDER_BOOK_TBT_DATA,
+
+    ORDER_BOOK_5,
+    ORDER_BOOK_5_DATA,
+
+
+
     TICKER,
     TICKER_DATA,
 
@@ -26,11 +34,13 @@ public enum OkxMessageTypeEnum {
 
 
     public boolean isSubscriptionAck() {
-        return this == ORDER_BOOK || this == TICKER || this == TRADE || this == CANDLE;
+        return this == ORDER_BOOK || this == TICKER || this == TRADE || this == CANDLE
+                || this == ORDER_BOOK_TBT || this == ORDER_BOOK_5;
     }
 
     public boolean isDataPush() {
-        return this == ORDER_BOOK_DATA || this == TICKER_DATA || this == TRADE_DATA || this == CANDLE_DATA;
+        return this == ORDER_BOOK_DATA || this == TICKER_DATA || this == TRADE_DATA || this == CANDLE_DATA
+                || this == ORDER_BOOK_TBT_DATA || this == ORDER_BOOK_5_DATA;
     }
 
     public String channelKey() {
@@ -38,6 +48,8 @@ public enum OkxMessageTypeEnum {
             case  LOGIN -> "login";
             case ERROR -> "error";
             case ORDER_BOOK, ORDER_BOOK_DATA -> "books";
+            case ORDER_BOOK_TBT, ORDER_BOOK_TBT_DATA -> "bbo-tbt";
+            case ORDER_BOOK_5, ORDER_BOOK_5_DATA -> "books5";
             case TICKER, TICKER_DATA -> "tickers";
             case TRADE, TRADE_DATA -> "trades";
             case CANDLE, CANDLE_DATA -> "candle";

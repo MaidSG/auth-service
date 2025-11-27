@@ -78,6 +78,36 @@ CREATE TABLE okx_ticker_data (
 );
 
 
+DROP TABLE  IF EXISTS okx_orderbook_snapshots_tbt;
+
+-- OKX 订单簿 TBT 快照表
+CREATE TABLE okx_orderbook_snapshots_tbt
+(
+    -- 主键ID
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- 产品ID
+    inst_id     TEXT    NOT NULL,
+    -- 推送数据动作，snapshot：全量，update：增量
+    action      TEXT,
+    -- 卖方深度，JSON字符串
+    asks        TEXT,
+    -- 买方深度，JSON字符串
+    bids        TEXT,
+    -- 数据更新时间戳
+    ts          INTEGER NOT NULL,
+    -- 检验和
+    checksum    INTEGER,
+    -- 上一个推送的序列号
+    prev_seq_id INTEGER,
+    -- 推送的序列号
+    seq_id      INTEGER NOT NULL
+);
+
+-- 为 inst_id 和 ts 创建索引
+CREATE INDEX idx_inst_id_ts ON okx_orderbook_snapshots_tbt (inst_id, ts);
+
+
+
 
 
 -- 初始化数据

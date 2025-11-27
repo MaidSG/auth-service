@@ -143,7 +143,7 @@ public class OkxPublicClientEndpoint {
                     "args":[
                         {
                             "channel":"tickers",
-                            "instId":"BTC-USDT"
+                            "instId":"BTC-USDT-SWAP"
                         }
                     ]
                 }
@@ -174,6 +174,20 @@ public class OkxPublicClientEndpoint {
                 signatureService.buildWebSocketSig(timestamp.toString(), signatureService.getApiSecret())
         );
         manager.send(CLIENT_ID, loginJson);
+
+        // 订阅两个 深度数据 bbo-tbt books5
+        String tbtJson = """
+                {
+                    "op": "subscribe",
+                    "args": [{
+                        "channel": "bbo-tbt",
+                        "instId": "BTC-USDT-SWAP"
+                    }]
+                }
+                """;
+        manager.send(CLIENT_ID, tbtJson);
+
+
 
 
     }

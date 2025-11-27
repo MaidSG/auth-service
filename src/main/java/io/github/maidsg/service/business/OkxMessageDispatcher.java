@@ -114,6 +114,8 @@ public class OkxMessageDispatcher {
         return switch (type) {
             case "tickers" -> OkxMessageTypeEnum.TICKER_DATA;
             case "books" -> OkxMessageTypeEnum.ORDER_BOOK_DATA;
+            case "bbo-tbt" -> OkxMessageTypeEnum.ORDER_BOOK_TBT_DATA;
+            case "books5" -> OkxMessageTypeEnum.ORDER_BOOK_5_DATA;
             case "trades" -> OkxMessageTypeEnum.TRADE_DATA;
             case "candle3m" -> OkxMessageTypeEnum.CANDLE_DATA;
             case "login" -> OkxMessageTypeEnum.LOGIN;
@@ -128,6 +130,8 @@ public class OkxMessageDispatcher {
         return switch (channel.toLowerCase()) {
             case "tickers" -> OkxMessageTypeEnum.TICKER;
             case "books" -> OkxMessageTypeEnum.ORDER_BOOK;
+            case "bbo-tbt" -> OkxMessageTypeEnum.ORDER_BOOK_TBT;
+            case "books5" -> OkxMessageTypeEnum.ORDER_BOOK_5;
             case "trades" -> OkxMessageTypeEnum.TRADE;
             case "error" -> OkxMessageTypeEnum.ERROR;
             default -> null;
