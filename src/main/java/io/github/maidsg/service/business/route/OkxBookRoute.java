@@ -3,7 +3,7 @@ package io.github.maidsg.service.business.route;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.maidsg.model.dto.ws.OkxBooksDataDTO;
-import io.github.maidsg.model.entity.OkxOrderBookSnapshotsTbtEntity;
+import io.github.maidsg.model.entity.basic.OkxOrderBookSnapshotsTbtEntity;
 import io.github.maidsg.service.dao.OkxOrderBookSnapshotsTbtRepository;
 import io.github.maidsg.util.JsonParserProvider;
 import io.github.maidsg.websocket.enums.OkxMessageTypeEnum;

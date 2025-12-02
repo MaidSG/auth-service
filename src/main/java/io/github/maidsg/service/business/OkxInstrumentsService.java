@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.maidsg.api.okx.OkxPublicClient;
 import io.github.maidsg.api.okx.model.client.OkxPublicResp;
 import io.github.maidsg.api.okx.model.dto.common.Instrument;
-import io.github.maidsg.model.entity.OkxInstrumentEntity;
+import io.github.maidsg.model.entity.basic.OkxInstrumentEntity;
 import io.github.maidsg.service.dao.OkxInstrumentRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

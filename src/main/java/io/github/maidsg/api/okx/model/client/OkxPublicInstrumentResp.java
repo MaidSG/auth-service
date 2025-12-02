@@ -2,9 +2,11 @@ package io.github.maidsg.api.okx.model.client;
 
 
 import io.github.maidsg.api.okx.model.dto.common.Instrument;
+import lombok.Getter;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import java.util.List;
 
+@Getter
 @Schema(name = "OkxPublicInstrumentResp", description = "OKX 公共接口返回 - instruments 具体化响应")
 public class OkxPublicInstrumentResp {
 
@@ -22,32 +24,12 @@ public class OkxPublicInstrumentResp {
 
     public OkxPublicInstrumentResp() {}
 
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
     public void setMsg(String msg) {
         this.msg = msg;
     }
 
-    public List<Instrument> getData() {
-        return data;
-    }
-
     public void setData(List<Instrument> data) {
         this.data = data;
-    }
-
-    public Long getTs() {
-        return ts;
     }
 
     public void setTs(Long ts) {

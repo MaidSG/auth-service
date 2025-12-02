@@ -6,6 +6,7 @@ import io.github.maidsg.websocket.enums.OkxMessageTypeEnum;
 import io.github.maidsg.websocket.handler.MarketMessageHandler;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
@@ -34,7 +35,7 @@ public class OkxMessageDispatcher {
         this.parserProvider = parserProvider;
     }
 
-    void onStart(@Observes StartupEvent ev) {
+    void onStart(@Observes @Priority(2000) StartupEvent ev) {
         handlerMap = new EnumMap<>(OkxMessageTypeEnum.class);
         for (MarketMessageHandler handler : handlerInstances) {
             EnumSet<OkxMessageTypeEnum> types = handler.getSupportedTypes();

@@ -1,4 +1,4 @@
-package io.github.maidsg.model.entity;
+package io.github.maidsg.model.entity.basic;
 
 import io.github.maidsg.util.OffsetDateTimeTextConverter;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;

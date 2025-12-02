@@ -6,7 +6,10 @@ import io.github.maidsg.api.okx.OkxPublicClient;
 import io.github.maidsg.api.okx.model.client.OkxPublicResp;
 import io.github.maidsg.api.okx.model.dto.common.Instrument;
 import io.github.maidsg.api.okx.model.dto.common.OkxServerTime;
+import io.github.maidsg.engine.OkxDeltaEngine;
+import io.github.maidsg.model.dto.engine.OkxBatchingDeltaReq;
 import io.github.maidsg.service.business.OkxInstrumentsService;
+import io.github.maidsg.websocket.client.OkxPublicWebSocketConnector;
 import io.github.maidsg.websocket.manager.OkxInstrumentsManager;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
@@ -49,9 +52,31 @@ public class PerHeatStartUp {
     ObjectMapper objectMapper;
 
 
+
+    @Inject
+    OkxDeltaEngine okxDeltaEngine;
+
+    @Inject
+    OkxPublicWebSocketConnector connector;
+
+
+
     void onStart(@Observes StartupEvent ev) {
 
         Log.info("===== 系统初始化开始 =====");
+        connector.connectPC();
+        connector.connectBusiness();
+
+
+        okxDeltaEngine.getBatchDelta(
+                OkxBatchingDeltaReq.builder()
+                        .symbol("BTC-USD-SWAP")
+                        .startTime(1764563134233L)
+                        .endTime(1764563134371L)
+
+                        .build()
+        );
+
         // 调用接口更新交易所基础数据
 
         // okx 基础信息

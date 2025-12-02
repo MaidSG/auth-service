@@ -1,4 +1,4 @@
-package io.github.maidsg.model.entity;
+package io.github.maidsg.model.entity.basic;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

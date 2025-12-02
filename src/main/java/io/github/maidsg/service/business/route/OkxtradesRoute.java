@@ -2,7 +2,7 @@ package io.github.maidsg.service.business.route;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.maidsg.model.dto.ws.OkxTradesDataDTO;
-import io.github.maidsg.model.entity.OkxRawTradesEntity;
+import io.github.maidsg.model.entity.basic.OkxRawTradesEntity;
 import io.github.maidsg.service.dao.OkxRawTradesRepository;
 import io.github.maidsg.util.JsonParserProvider;
 import io.github.maidsg.websocket.bridge.MarketMessageBridge;

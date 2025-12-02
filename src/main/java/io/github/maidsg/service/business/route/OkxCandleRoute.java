@@ -1,13 +1,11 @@
 package io.github.maidsg.service.business.route;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.maidsg.engine.OkxDeltaEngine;
 import io.github.maidsg.model.dto.ws.OkxCandleDataDTO;
-import io.github.maidsg.model.dto.ws.OkxTradesDataDTO;
-import io.github.maidsg.model.entity.OkxCandleEntity;
-import io.github.maidsg.model.entity.OkxRawTradesEntity;
+import io.github.maidsg.model.entity.basic.OkxCandleEntity;
 import io.github.maidsg.service.dao.OkxCandleRepository;
 import io.github.maidsg.util.JsonParserProvider;
-import io.github.maidsg.websocket.bridge.MarketMessageBridge;
 import io.github.maidsg.websocket.enums.OkxMessageTypeEnum;
 import io.github.maidsg.websocket.handler.MarketMessageHandler;
 import io.quarkus.logging.Log;
@@ -17,7 +15,6 @@ import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -40,6 +37,12 @@ public class OkxCandleRoute implements MarketMessageHandler {
 
     @Inject
     OkxCandleRepository candleRepository;
+
+    @Inject
+    OkxDeltaEngine deltaEngine;
+
+
+    private static Long lastTimestamp = null;
 
 
     @Override
@@ -84,12 +87,27 @@ public class OkxCandleRoute implements MarketMessageHandler {
                 return;
             }
 
-            dto.getData().stream()
+            final OkxCandleDataDTO.ChannelArg arg = dto.getArg();
+            final Long[] newTimestamp = {lastTimestamp};
+            var entities = dto.getData().stream()
                     .filter(Objects::nonNull)
                     .filter(row -> row.size() >= 9)
-                    .map(row -> toEntity(dto.getArg(), row))
-                    .forEach(candleRepository::persist);
+                    .map(row -> {
+                        OkxCandleEntity entity = toEntity(arg, row);
+                        Long ts = Long.parseLong(row.get(0));
+                        if (newTimestamp[0] == null || ts > newTimestamp[0]) {
+                            newTimestamp[0] = ts;
+                        }
+                        return entity;
+                    })
+                    .toList();
 
+            entities.forEach(candleRepository::persist);
+
+            if (newTimestamp[0] != null && !Objects.equals(newTimestamp[0], lastTimestamp)) {
+                lastTimestamp = newTimestamp[0];
+                deltaEngine.doCalculateDeltaData(lastTimestamp);
+            }
         } catch (Exception e) {
             Log.errorf(e, "Failed to persist OKX trades payload: %s", payload);
         }
@@ -120,7 +138,6 @@ public class OkxCandleRoute implements MarketMessageHandler {
     private BigDecimal parseDecimal(String value) {
         return value == null || value.isBlank() ? null : new BigDecimal(value);
     }
-
 
 
 }

@@ -3,7 +3,7 @@ package io.github.maidsg.service.business.route;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.maidsg.model.dto.ws.OkxSubscriptionResp;
 import io.github.maidsg.model.dto.ws.OkxTickersDataDTO;
-import io.github.maidsg.model.entity.OkxTickersEntity;
+import io.github.maidsg.model.entity.basic.OkxTickersEntity;
 import io.github.maidsg.service.dao.OkxTickersRepository;
 import io.github.maidsg.util.JsonParserProvider.RootFields;
 import io.github.maidsg.websocket.bridge.MarketMessageBridge;

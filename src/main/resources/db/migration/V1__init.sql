@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS okx_instrument (
 );
 
 
-DROP TABLE  IF EXISTS okx_raw_trades;
+-- DROP TABLE  IF EXISTS okx_raw_trades;
 CREATE TABLE IF NOT EXISTS okx_raw_trades (
                                               id            INTEGER PRIMARY KEY AUTOINCREMENT ,
                                               inst_id       TEXT    NOT NULL,
@@ -105,6 +105,24 @@ CREATE TABLE okx_orderbook_snapshots_tbt
 
 -- 为 inst_id 和 ts 创建索引
 CREATE INDEX idx_inst_id_ts ON okx_orderbook_snapshots_tbt (inst_id, ts);
+
+
+
+-- 指标表
+CREATE TABLE okx_delta_metrics (
+                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                   inst_id TEXT NOT NULL,
+                                   time_window TEXT NOT NULL,
+                                   start_time INTEGER NOT NULL,
+                                   end_time INTEGER NOT NULL,
+                                   buy_volume DECIMAL(19,8),
+                                   sell_volume DECIMAL(19,8),
+                                   net_delta DECIMAL(19,8),
+                                   cumulative_delta DECIMAL(19,8),
+                                   large_trades INTEGER,
+                                   large_buy_volume DECIMAL(19,8),
+                                   large_sell_volume DECIMAL(19,8)
+);
 
 
 

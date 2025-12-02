@@ -1,8 +1,7 @@
-package io.github.maidsg.model.entity;
+package io.github.maidsg.model.entity.basic;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;

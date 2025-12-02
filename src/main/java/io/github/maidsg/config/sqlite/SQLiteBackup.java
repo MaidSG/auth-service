@@ -1,3 +1,4 @@
+// Java
 package io.github.maidsg.config.sqlite;
 
 import io.agroal.api.AgroalDataSource;
@@ -15,48 +16,75 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-/*******************************************************************
- *
- * @author wy
- */
 @ApplicationScoped
 public class SQLiteBackup {
+
+    private static final int BUSY_TIMEOUT_MS = 5_000;
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_SLEEP_MS = 1_000;
 
     @ConfigProperty(name = "quarkus.datasource.jdbc.url")
     String jdbcUrl;
 
+
     @Inject
     AgroalDataSource dataSource;
 
-    // Execute a backup every 600 seconds
-    @Scheduled(delay=10, delayUnit= TimeUnit.SECONDS, every="5s")
-    void scheduled() { backup(); }
+    @Scheduled(delay = 10, delayUnit = TimeUnit.SECONDS, every = "6s"
+           , concurrentExecution = Scheduled.ConcurrentExecution.SKIP
+    )
+    void scheduled() {
+        backup();
 
-    // Execute a backup during shutdown
+    }
+
     public void onShutdown(@Observes ShutdownEvent event) { backup(); }
 
     void backup() {
         String dbFile = jdbcUrl.substring("jdbc:sqlite:".length());
-
         Path originalDbFilePath = Paths.get(dbFile).toAbsolutePath();
-        Path backupDbFilePath = originalDbFilePath
-                .getParent()
+        Path backupDbFilePath = originalDbFilePath.getParent()
                 .resolve(originalDbFilePath.getFileName() + ".bak");
 
         try {
+//            Files.deleteIfExists(originalDbFilePath);
             Files.deleteIfExists(backupDbFilePath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to prepare backup destination", e);
         }
 
-        try (var conn = dataSource.getConnection();
-             var stmt = conn.createStatement()) {
-            String target = backupDbFilePath.toString().replace("'", "''");
-            stmt.executeUpdate("VACUUM INTO '" + target + "'");
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to back up the database", e);
+        String target = backupDbFilePath.toString().replace("'", "''");
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try (var conn = dataSource.getConnection();
+                 var stmt = conn.createStatement()) {
+                stmt.execute("PRAGMA busy_timeout = " + BUSY_TIMEOUT_MS);
+                stmt.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+                try {
+                    Files.deleteIfExists(Paths.get(target));
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to prepare backup destination", e);
+                }
+                stmt.executeUpdate("VACUUM INTO '" + target + "'");
+
+                return;
+            } catch (SQLException e) {
+                if (isBusy(e) && attempt < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(RETRY_SLEEP_MS);
+                    } catch (InterruptedException ignored) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                    continue;
+                }
+                throw new RuntimeException("Failed to back up the database", e);
+            }
         }
     }
 
-
+    private boolean isBusy(SQLException e) {
+        String message = e.getMessage();
+        return message != null && (message.contains("database is locked")
+                || message.contains("database is busy"));
+    }
 }
