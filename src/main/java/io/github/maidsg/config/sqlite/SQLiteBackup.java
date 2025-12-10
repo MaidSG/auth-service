@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class SQLiteBackup {
 
     private static final int BUSY_TIMEOUT_MS = 5_000;
-    private static final int MAX_RETRIES = 3;
-    private static final long RETRY_SLEEP_MS = 1_000;
+    private static final int MAX_RETRIES = 5;
+    private static final long RETRY_SLEEP_MS = 2_000;
 
     @ConfigProperty(name = "quarkus.datasource.jdbc.url")
     String jdbcUrl;
@@ -30,7 +30,7 @@ public class SQLiteBackup {
     @Inject
     AgroalDataSource dataSource;
 
-    @Scheduled(delay = 10, delayUnit = TimeUnit.SECONDS, every = "6s"
+    @Scheduled(delay = 10, delayUnit = TimeUnit.SECONDS, every = "10s"
            , concurrentExecution = Scheduled.ConcurrentExecution.SKIP
     )
     void scheduled() {
